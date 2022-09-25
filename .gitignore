@@ -1,0 +1,6 @@
+.idea/
+.python-version
+__pycache__/
+*.xlsx
+upload_test/
+.DS_Store

@@ -1,0 +1,19 @@
+<html>
+<head>
+    <title> test 1 </title>
+</head>
+    <form action= "/run/" method="post" enctype="multipart/form-data">
+        <label for="people_file"> 인명부 </label> <br>
+        <input type="file" name="people_file" accept=".xlsx"> 
+        <p> *주의! 2번row에 헤더 포함되어야 합니다. sheet 이름이 "Member List" 인지 확인해주세요.</p>
+        <br><br><br>
+        <label for="card_file"> 카드사 내역 </label> <br>
+        <input type="file" name="card_file" accept=".xlsx">
+        <p> *주의! sheet 이름이 "신용_국내" 인지 확인해주세요.</p>
+        <br><br><br>
+        <label for="channel_id"> PAY_EXCEL_BOT의 채널 ID </label> <br>
+        <input type="text" name="channel_id" size="15">
+        <p> *주의! 사람마다 채널ID가 다릅니다. 꼭 직접 확인하세요. </p>
+        <input type="submit" value="시작">
+    </form>
+</html>
