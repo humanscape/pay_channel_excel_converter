@@ -1,17 +1,15 @@
 from typing import Tuple
 import openpyxl
+from pydantic import BaseModel
 
 
-class Human:
-    def __init__(
-        self, cic_name, cell_name, kor_name, eng_name, card_full_num, nicknames=[]
-    ):
-        self.cic_name = cic_name
-        self.cell_name = cell_name
-        self.eng_name = eng_name
-        self.kor_name = kor_name
-        self.card_full_num = card_full_num
-        self.nicknames = nicknames
+class Human(BaseModel):
+    cic_name: str
+    cell_name: str
+    eng_name: str
+    kor_name: str
+    eng_name: str
+    card_full_num: str | None
 
     def __repr__(self):
         return f"{self.cic_name} {self.cell_name} {self.eng_name}"
