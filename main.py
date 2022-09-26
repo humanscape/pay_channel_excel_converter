@@ -17,16 +17,19 @@ from constants import START_AT, END_AT, WS_NEW_HEADERS
 
 app = FastAPI()
 
+
 @app.get("/", response_class=HTMLResponse)
-async def upload_form(request:Request):
+async def upload_form(request: Request):
     templates = Jinja2Templates(directory="templates")
-    return templates.TemplateResponse("upload_form.html", {"request":request})
+    return templates.TemplateResponse("upload_form.html", {"request": request})
 
 
 @app.post("/run/")
-async def run(people_file: UploadFile, card_file:UploadFile, channel_id:str=Form()):
+async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = Form()):
     slack = Slack()
-    send_success = slack.send_message(f"요청을 받았습니다. 시작시간 :{datetime.now()} / 검색범위 : {START_AT} ~ {END_AT}",channel_id)
+    send_success = slack.send_message(
+        f"요청을 받았습니다. 시작시간 :{datetime.now()} / 검색범위 : {START_AT} ~ {END_AT}", channel_id
+    )
     if not send_success:
         return "슬랙 메시지 전송에 실패했습니다. 채널ID를 확인해주세요."
 
@@ -34,7 +37,9 @@ async def run(people_file: UploadFile, card_file:UploadFile, channel_id:str=Form
     wb_people = load_workbook(filename=BytesIO(people_file_read))
     nick_to_human, card_num_to_human = NameExcelToDict().run(wb_people=wb_people)
     # 셀 헤더에 CIC끼리 뭉치기
-    cell_list = list(set([(human.cic_name, human.cell_name) for human in card_num_to_human.values()]))
+    cell_list = list(
+        set([(human.cic_name, human.cell_name) for human in card_num_to_human.values()])
+    )
     cell_list.sort()
     cell_list = [x[1] for x in cell_list]
 
@@ -54,41 +59,41 @@ async def run(people_file: UploadFile, card_file:UploadFile, channel_id:str=Form
     attempts += 1
     pay_messages = slack.crawl_all_messages()
 
-    if pay_messages is None :
+    if pay_messages is None:
         slack.error_report(message="채널에서 메시지 수집에 실패했습니다.")
         return "채널에서 메시지 수집에 실패했습니다."
     attempts = 0
     idx_passed = 0
 
-    while attempts < 50 :
+    while attempts < 50:
         attempts += 1
-        try : 
+        try:
             for idx, (ts, pay_channel_data) in enumerate(pay_messages.items()):
-                if (
-                    (idx < idx_passed)
-                    or 
-                    (not pay_channel_data.dict_key in card_dict)
-                ):
+                if (idx < idx_passed) or (not pay_channel_data.dict_key in card_dict):
                     continue
-                if idx%100 == 0 :
-                    slack.send_message(f"{len(pay_messages)}개의 글 중 {idx}번째 글의 댓글 수집중", channel_id)
-                slack.get_a_reply_from_slack(ts,pay_messages)
+                if idx % 100 == 0:
+                    slack.send_message(
+                        f"{len(pay_messages)}개의 글 중 {idx}번째 글의 댓글 수집중", channel_id
+                    )
+                slack.get_a_reply_from_slack(ts, pay_messages)
                 row = card_dict[pay_channel_data.dict_key]
 
-                if pay_channel_data.replies :
+                if pay_channel_data.replies:
                     card_data_converter.add_comments(card_sheet, row, pay_channel_data)
-                    card_data_converter.add_usage_and_owners(card_sheet, row, pay_channel_data, nick_to_human)
+                    card_data_converter.add_usage_and_owners(
+                        card_sheet, row, pay_channel_data, nick_to_human
+                    )
                 idx_passed = idx
                 await sleep(2)
             break
-        except SSLError as ssl_error :
+        except SSLError as ssl_error:
             sleep(30)
             slack.error_report(ssl_error)
         except BaseException as e:
             error_traceback = traceback.format_exc()
             slack.error_report(error_traceback)
-    
+
     # 결과물 (OUTPUT)
-    vb = save_virtual_workbook(wb_card)    
+    vb = save_virtual_workbook(wb_card)
     slack.send_file(file=vb, channel_id=channel_id)
     return "슬랙 메시지를 확인하세요."

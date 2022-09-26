@@ -1,23 +1,25 @@
 from pydantic import BaseModel, ValidationError, validator
 
+
 class SlackResponseMetaData(BaseModel):
-    next_cursor:str
+    next_cursor: str
+
 
 class SlackFile(BaseModel):
-    permalink:str
+    permalink: str
 
 
 class SlackMessage(BaseModel):
-    text:str
-    ts:str
+    text: str
+    ts: str
     reply_count: int | None
     files: list[SlackFile] | None
 
 
 class SlackResponse(BaseModel):
-    ok:bool
+    ok: bool
 
-    @validator('ok')
+    @validator("ok")
     def ok_must_true(cls, ok):
         if not ok:
             raise ValidationError("Request to Slack failed in some reason")
@@ -26,12 +28,14 @@ class SlackResponse(BaseModel):
 
 class ConversationsHistory(SlackResponse):
     """slack.com/api/converstaions.history"""
+
     ok: bool
     messages: list[SlackMessage]
-    response_metadata:SlackResponseMetaData | None
+    response_metadata: SlackResponseMetaData | None
 
 
 class ConversationsReplies(SlackResponse):
     """slack.com/api/conversations.replies"""
-    ok:bool
+
+    ok: bool
     messages: list[SlackMessage]
