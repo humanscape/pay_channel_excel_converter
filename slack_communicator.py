@@ -1,9 +1,10 @@
 import os
 import traceback
-from time import sleep
+from asyncio import sleep
 from collections import deque
 from datetime import datetime
 import urllib3
+from requests.exceptions import SSLError
 
 import requests
 
@@ -73,34 +74,56 @@ class PayChannelData:
 
 class Slack:
     def __init__(self):
-        self.Q1 = deque([1])
+        self.Q1 = deque(["_"])
         self.pay_channel_datas = {}  # key:ts, value: PayChannelData
         self._data = {
             "channel": PAY_CHANNEL_ID,
-            "oldest": datetime_to_ts(START_AT),
-            "latest": datetime_to_ts(END_AT),
-            "limit": 300,
         }
         self.headers = {
             "Content-Type": "application/x-www-form-urlencoded",
             "Authorization": f"Bearer {SLACK_BOT_TOKEN}",
         }
 
+    def _post_(
+        self,
+        method: str,
+        header_option: dict | None = None,
+        data_option: dict | None = None,
+    ):
+        try:
+            res = requests.post(
+                url=SLACK_URL + method,
+                headers={**self.headers, **header_option},
+                data={**self._data, **data_option},
+                verify=False,
+            ).json()
+            return res
+        except SSLError as ssl_error:
+            pass
+            # await sleep(30)
+            # self.error_report(ssl_error)
+
     def crawl_all_messages(self) -> dict:
         while self.Q1:
             cursor = self.Q1.popleft()
-            if cursor != 1:
-                self._data["cursor"] = cursor
-            self.save_300_message()
+            if cursor == "_":
+                self.save_300_message()
+                continue
+            self.save_300_message(cursor)
+
         return self.pay_channel_datas
 
-    def save_300_message(self):
+    def save_300_message(self, cursor: str = None):
         res = ConversationsHistory(
-            **requests.post(
-                url=SLACK_URL + "conversations.history",
-                headers=self.headers,
-                data=self._data,
-            ).json()
+            **self._post_(
+                "conversations.history",
+                data_option={
+                    "cursor": cursor,
+                    "oldest": datetime_to_ts(START_AT),
+                    "latest": datetime_to_ts(END_AT),
+                    "limit": 300,
+                },
+            )
         )
         for message in res.messages:
             try:
@@ -114,17 +137,12 @@ class Slack:
 
         if res.response_metadata:
             self.Q1.append(res.response_metadata.next_cursor)
-        sleep(3)
+        await sleep(3)
         return
 
     def get_a_reply_from_slack(self, ts, pay_channel_datas: dict):
         res = ConversationsReplies(
-            **requests.post(
-                url=SLACK_URL + "conversations.replies",
-                headers=self.headers,
-                data={**self._data, "ts": ts},
-                verify=False,
-            ).json()
+            **self._post_("conversations.replies", data_option={"ts": ts})
         )
         replies = pay_channel_datas[ts].replies
 
@@ -151,20 +169,17 @@ class Slack:
         return
 
     def error_report(self, message=traceback.format_exc()):
-        res = requests.post(
-            url=SLACK_URL + "chat.postMessage",
-            headers=self.headers,
-            data={
+        res = self._post_(
+            "chat.postMessage",
+            data_option={
                 "channel": SLACK_REPORT_CHANNEL_ID,
                 "text": message,
-            },
-        )
+            })
 
     def send_message(self, message: str, channel_id: str):
-        res = requests.post(
-            url=SLACK_URL + "chat.postMessage",
-            headers=self.headers,
-            data={"channel": channel_id, "text": message},
-        ).json()
+        res = self._post_(
+            "chat.postMessage",
+            data_option={"channel": channel_id, "text": message}
+        )
 
         return res["ok"]
