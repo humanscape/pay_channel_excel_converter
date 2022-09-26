@@ -110,7 +110,7 @@ class Slack:
                 self.error_report(error_traceback)
                 continue
 
-        if hasattr(res,"response_metadata"):
+        if res.response_metadata:
             self.Q1.append(res.response_metadata.next_cursor)
         sleep(3)
         return
