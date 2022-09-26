@@ -23,12 +23,14 @@ class NameExcelToDict:
 
     def __init__(self, wb_people: openpyxl.Workbook):
         self.ws = wb_people["Member List"]
+        self.nick_to_human = {}
+        self.card_num_to_human = {}
 
     def run(self) -> Tuple[dict, dict]:
         self._init_cols()
-        nick_to_human, card_num_to_human = self._make_human_dict()
+        self._make_human_dict()
 
-        return nick_to_human, card_num_to_human
+        return self.nick_to_human, self.card_num_to_human
 
     def _init_cols(self):
         header_cells = self.ws[self.HEADER_START_ROW]
@@ -52,8 +54,6 @@ class NameExcelToDict:
 
     def _make_human_dict(self):
         row = self.HEADER_START_ROW + 1
-        nick_to_human = {}
-        card_num_to_human = {}
         while self._get_id_num(row) is not None:
             row_values = {}
             for header, col_nums in self.header_cols.items():
@@ -64,12 +64,13 @@ class NameExcelToDict:
                 nickname = self.ws.cell(row, nickname_cols).value
                 if not nickname:
                     continue
-                if nickname in nick_to_human:
-                    nick_to_human[nickname] = False
+                if nickname in self.nick_to_human:
+                    self.nick_to_human[nickname] = False
                     continue
                 human = Human(**row_values)
-                nick_to_human[nickname] = human
-                card_num_to_human[human.card_full_num] = human
+                self.nick_to_human[nickname] = human
+                self.card_num_to_human[human.card_full_num] = human
             row += 1
 
-        return nick_to_human, card_num_to_human
+        return
+
