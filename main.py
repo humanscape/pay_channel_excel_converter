@@ -2,7 +2,6 @@ import traceback
 from datetime import datetime
 from asyncio import sleep
 from io import BytesIO
-import json
 
 from requests.exceptions import SSLError
 from openpyxl import load_workbook
@@ -36,7 +35,7 @@ async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = 
 
     people_file_read = await people_file.read()
     wb_people = load_workbook(filename=BytesIO(people_file_read))
-    nick_to_human, card_num_to_human = NameExcelToDict(wb_people=wb_people).run()s
+    nick_to_human, card_num_to_human = NameExcelToDict(wb_people=wb_people).run()
     # 셀 헤더에 CIC끼리 뭉치기
     cell_list = list(
         set([(human.cic_name, human.cell_name) for human in card_num_to_human.values()])
@@ -44,7 +43,6 @@ async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = 
     cell_list.sort()
     cell_list = [x[1] for x in cell_list]
 
-    global WS_NEW_HEADERS
     WS_NEW_HEADERS.extend(cell_list)
     WS_NEW_HEADERS.append("댓글/파일")
 
@@ -54,13 +52,12 @@ async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = 
     card_sheet = card_data_converter.get_new_sheet()
     card_dict = card_data_converter.get_card_data_dict()
     card_data_converter.add_card_owner_to_new_sheet(card_num_to_human)
-    """
+
     attempts = 0
-    pay_messages = None
     attempts += 1
     pay_messages = slack.crawl_all_messages()
 
-    if pay_messages is None:
+    if not pay_messages:
         slack.error_report(message="채널에서 메시지 수집에 실패했습니다.")
         return "채널에서 메시지 수집에 실패했습니다."
     attempts = 0
@@ -70,7 +67,7 @@ async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = 
         attempts += 1
         try:
             for idx, (ts, pay_channel_data) in enumerate(pay_messages.items()):
-                if (idx < idx_passed) or (not pay_channel_data.dict_key in card_dict):
+                if (idx < idx_passed) or (pay_channel_data.dict_key not in card_dict):
                     continue
                 if idx % 100 == 0:
                     slack.send_message(
@@ -88,12 +85,11 @@ async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = 
                 await sleep(2)
             break
         except SSLError as ssl_error:
-            sleep(30)
+            await sleep(30)
             slack.error_report(ssl_error)
         except BaseException as e:
             error_traceback = traceback.format_exc()
             slack.error_report(error_traceback)
-    """
     # 결과물 (OUTPUT)
     vb = save_virtual_workbook(wb_card)
     slack.send_file(file=vb, channel_id=channel_id)
