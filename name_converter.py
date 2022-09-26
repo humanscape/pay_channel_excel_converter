@@ -2,6 +2,8 @@ from typing import Tuple, Final, Dict, List
 import openpyxl
 from pydantic import BaseModel
 
+from constants import PEOPLE_LIST_HEADERS
+
 
 class Human(BaseModel):
     cic_name: str
@@ -23,28 +25,27 @@ class NameExcelToDict:
         self.ws = wb_people["Member List"]
 
     def run(self) -> Tuple[dict, dict]:
-        self._set_headers()
+        self._init_cols()
         nick_to_human, card_num_to_human = self._make_human_dict()
 
         return nick_to_human, card_num_to_human
 
-    def _set_headers(self):
-        HEADERS:Final = {
-            "이름": "kor_name",
-            "cic": "cic_name",
-            "cell": "cell_name",
-            "영어이름": "eng_name",
-            "카드번호": "card_full_num",
-        }
-        headers = self.ws[self.HEADER_START_ROW]
-        for header in headers:
-            if header.value is None:
+    def _init_cols(self):
+        header_cells = self.ws[self.HEADER_START_ROW]
+        for cell in header_cells:
+            if cell.value is None:
                 continue
-            value = header.value.lower()
-            if value in HEADERS:
-                self.header_cols[HEADERS[value]] = header.col_idx
-            elif "name" in value:
-                self.header_cols["nicknames"].append(header.col_idx)
+            value = cell.value.lower()
+            self._set_header_cols(cell, value)
+            self._set_nickname_cols(cell, value)
+
+    def _set_header_cols(self, cell, value):
+        if value in PEOPLE_LIST_HEADERS:
+            self.header_cols[PEOPLE_LIST_HEADERS[value]] = cell.col_idx
+
+    def _set_nickname_cols(self, cell, value):
+        if "name" in value:
+            self.header_cols["nicknames"].append(cell.col_idx)
 
     def _get_id_num(self, row):
         return self.ws.cell(row, 1).value

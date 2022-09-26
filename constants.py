@@ -8,6 +8,14 @@ START_AT = datetime(_month_ago.year, _month_ago.month, 1)
 END_AT = datetime(_now.year, _now.month, 1)
 
 YEAR = _month_ago.year
+PEOPLE_LIST_HEADERS = {
+    "이름": "kor_name",
+    "cic": "cic_name",
+    "cell": "cell_name",
+    "영어이름": "eng_name",
+    "카드번호": "card_full_num",
+}
+
 WS_NEW_HEADERS = [
     "_",
     "승인일",
