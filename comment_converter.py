@@ -25,7 +25,7 @@ def word_converter(words, nick_to_human, CELL_LIST):
             continue
 
         if word not in nick_to_human:
-            return ({"usage":None,"kor_names": None})
+            return ({"usage":None,"kor_names": None, "cell_counter": None})
 
         if nick_to_human[word]:
             if result["kor_names"] :
@@ -36,10 +36,11 @@ def word_converter(words, nick_to_human, CELL_LIST):
     return result
 
 def comment_converter(comment, nick_to_human):
-    CELL_LIST = WS_NEW_HEADERS[WS_NEW_HEADERS.indx("셀")+1:-1]
+    CELL_LIST = WS_NEW_HEADERS[WS_NEW_HEADERS.index("셀")+1:-1]
     words = comment.replace("/"," "
         ).replace(",", " "
         ).replace("(", " "
-        ).replace(")"," "
+        ).replace(")", " "
+        ).replace("\n", " "
         ).split(" ")
     return word_converter(words , nick_to_human, CELL_LIST)

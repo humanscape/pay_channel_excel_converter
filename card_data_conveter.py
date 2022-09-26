@@ -114,7 +114,8 @@ class CardDataConverter:
         if kor_names :
             ws.cell(row, self.OWNER_COL, kor_names)
         
-        for cell, count in cell_counter.items():
-            ws.cell(row, WS_NEW_HEADERS.index(cell), int(count))
+        if cell_counter :
+            for cell, count in cell_counter.items():
+                ws.cell(row, WS_NEW_HEADERS.index(cell), int(count))
 
         return

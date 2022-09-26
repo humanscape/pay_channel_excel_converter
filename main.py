@@ -22,19 +22,6 @@ async def upload_form(request:Request):
     templates = Jinja2Templates(directory="templates")
     return templates.TemplateResponse("upload_form.html", {"request":request})
 
-# @app.get("/stop")
-# async def stop():
-#     """플로우
-#     진행중인 작업 중지
-#     """
-
-# @app.get("/time_check")
-# async def time_check():
-#     """플로우
-#     기대 전체시간 = 전체 메시지 길이 * 3.3초
-#     남은 기대시간 = (전체 메시지 길이 - 여태까지 긁어온 메시지 길이) * 3.3초
-#     """
-
 
 @app.post("/run/")
 async def run(people_file: UploadFile, card_file:UploadFile, channel_id:str=Form()):
@@ -46,9 +33,14 @@ async def run(people_file: UploadFile, card_file:UploadFile, channel_id:str=Form
     people_file_read = await people_file.read()
     wb_people = load_workbook(filename=BytesIO(people_file_read))
     nick_to_human, card_num_to_human = NameExcelToDict().run(wb_people=wb_people)
-    cell_list = list(set([human.cell_name for human in card_num_to_human.values()]))
-    # CELL 이름
-    WS_NEW_HEADERS = WS_NEW_HEADERS[:-1] + cell_list + WS_NEW_HEADERS[-1]
+    # 셀 헤더에 CIC끼리 뭉치기
+    cell_list = list(set([(human.cic_name, human.cell_name) for human in card_num_to_human.values()]))
+    cell_list.sort()
+    cell_list = [x[1] for x in cell_list]
+
+    global WS_NEW_HEADERS
+    WS_NEW_HEADERS.extend(cell_list)
+    WS_NEW_HEADERS.append("댓글/파일")
 
     card_file_read = await card_file.read()
     wb_card = load_workbook(filename=BytesIO(card_file_read))
@@ -90,6 +82,7 @@ async def run(people_file: UploadFile, card_file:UploadFile, channel_id:str=Form
                 await sleep(2)
             break
         except SSLError as ssl_error :
+            sleep(30)
             slack.error_report(ssl_error)
         except BaseException as e:
             error_traceback = traceback.format_exc()
