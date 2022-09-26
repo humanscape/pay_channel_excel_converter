@@ -27,7 +27,7 @@ class SlackResponse(BaseModel):
 
 
 class ConversationsHistory(SlackResponse):
-    """slack.com/api/converstaions.history"""
+    """slack.com/api/conversations.history"""
 
     ok: bool
     messages: list[SlackMessage]

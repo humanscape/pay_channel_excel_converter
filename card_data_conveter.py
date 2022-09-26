@@ -66,7 +66,7 @@ class CardDataConverter:
         ws_new = self.ws_new
         # 시간 + 카드번호 + 금액이 겹치는 경우는 없을 것이라고 가정
         # {"2022.07.01 10:12:00 1234 15000 " : "row_num" }
-        cardData_row_to_payData = {}
+        card_data_row_to_pay_data = {}
         date_col = WS_NEW_HEADERS.index("승인일")
         time_col = WS_NEW_HEADERS.index("승인시간")  # 초 00으로 변경
         card_num_col = WS_NEW_HEADERS.index("카드번호")  # 뒤 4자리만
@@ -77,9 +77,9 @@ class CardDataConverter:
             card_num = ws_new.cell(row, card_num_col).value[-4:]
             amount = ws_new.cell(row, amount_col).value
 
-            cardData_row_to_payData[f"{date} {time} {card_num} {amount}"] = row
+            card_data_row_to_pay_data[f"{date} {time} {card_num} {amount}"] = row
 
-        return cardData_row_to_payData
+        return card_data_row_to_pay_data
 
     def add_pay_data_to_row(self, ws, row_num: int, data):
         return

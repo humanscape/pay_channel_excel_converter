@@ -18,10 +18,6 @@ SLACK_REPORT_CHANNEL_ID = os.environ.get("SLACK_REPORT_CHANNEL_ID")
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-def ts_to_datetime(ts: float) -> datetime:
-    return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M")
-
-
 def datetime_to_ts(_datetime: datetime):
     return _datetime.timestamp()
 
@@ -90,7 +86,7 @@ class Slack:
             "Authorization": f"Bearer {SLACK_BOT_TOKEN}",
         }
 
-    def crawl_all_messages(self) -> list[PayChannelData]:
+    def crawl_all_messages(self) -> dict:
         while self.Q1:
             cursor = self.Q1.popleft()
             if cursor != 1:
