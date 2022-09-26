@@ -29,7 +29,7 @@ class NameExcelToDict:
 
     def run(self) -> Tuple[dict, dict]:
         self._init_cols()
-        self._make_human_dict()
+        self._init_dicts()
 
         return self.nick_to_human, self.card_num_to_human
 
@@ -39,38 +39,49 @@ class NameExcelToDict:
             if cell.value is None:
                 continue
             value = cell.value.lower()
-            self._set_header_cols(cell, value)
-            self._set_nickname_cols(cell, value)
+            col_idx = cell.col_idx
+            self._set_header_cols(col_idx, value)
+            self._set_nickname_cols(col_idx, value)
 
-    def _set_header_cols(self, cell, value):
+    def _set_header_cols(self, col_idx: int, value: str) -> None:
         if value in PEOPLE_LIST_HEADERS:
-            self.header_cols[PEOPLE_LIST_HEADERS[value]] = cell.col_idx
+            self.header_cols[PEOPLE_LIST_HEADERS[value]] = col_idx
 
-    def _set_nickname_cols(self, cell, value):
+    def _set_nickname_cols(self, col_idx: int, value: str) -> None:
         if "name" in value:
-            self.nickname_cols.append(cell.col_idx)
+            self.nickname_cols.append(col_idx)
 
-    def _get_id_num(self, row):
-        return self.ws.cell(row, 1).value
+    def _id_exist(self, row) -> bool:
+        return self.ws.cell(row, 1).value is not None
 
-    def _make_human_dict(self):
+    def _init_dicts(self):
         row = self.HEADER_START_ROW + 1
-        while self._get_id_num(row) is not None:
-            row_values = {}
-            for header, col_nums in self.header_cols.items():
-                row_values[header] = self.ws.cell(row, col_nums).value
-
-            for nickname_cols in self.nickname_cols:
-                nickname = self.ws.cell(row, nickname_cols).value
-                if not nickname:
-                    continue
-                if nickname in self.nick_to_human:
-                    self.nick_to_human[nickname] = False
-                    continue
-                human = Human(**row_values)
-                self.nick_to_human[nickname] = human
-                self.card_num_to_human[human.card_full_num] = human
+        while self._id_exist(row):
+            human = self._set_human(row)
+            self._set_nick_to_human(row, human)
+            self._set_card_num_to_human(human)
             row += 1
-
         return
 
+    def _set_human(self, row: int) -> Human:
+        human_attrs = {}
+        for header, col_nums in self.header_cols.items():
+            human_attrs[header] = self.ws.cell(row, col_nums).value
+
+        return Human(**human_attrs)
+
+    def _set_nick_to_human(self, row: int, human: Human) -> None:
+        for nickname_cols in self.nickname_cols:
+            nickname = self.ws.cell(row, nickname_cols).value
+            if nickname is None:
+                continue
+            if nickname in self.nick_to_human:
+                self.nick_to_human[nickname] = False
+                continue
+            self.nick_to_human[nickname] = human
+        return
+
+    def _set_card_num_to_human(self, human: Human):
+        self.card_num_to_human[human.card_full_num] = human
+
+        return
