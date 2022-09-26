@@ -103,13 +103,18 @@ class CardDataConverter:
         return
     
     def add_usage_and_owners(self, ws, row:int, pay_channel_data, nick_to_human):
-        usage_and_kor_names = comment_converter(pay_channel_data.replies[0], nick_to_human)
-        usage = usage_and_kor_names["usage"]
-        kor_names = usage_and_kor_names["kor_names"]
+        usage_and_kor_names_and_cells = comment_converter(pay_channel_data.replies[0], nick_to_human)
+        usage = usage_and_kor_names_and_cells["usage"]
+        kor_names = usage_and_kor_names_and_cells["kor_names"]
+        cell_counter = usage_and_kor_names_and_cells["cell_counter"]
 
         if usage is not None :
             ws.cell(row, self.USAGE_COL, usage)
         
         if kor_names :
             ws.cell(row, self.OWNER_COL, kor_names)
+        
+        for cell, count in cell_counter.items():
+            ws.cell(row, WS_NEW_HEADERS.index(cell), int(count))
+
         return

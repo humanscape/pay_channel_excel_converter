@@ -13,7 +13,7 @@ from fastapi.responses import HTMLResponse
 from name_converter import NameExcelToDict
 from card_data_conveter import CardDataConverter
 from slack_communicator import Slack
-from constants import START_AT, END_AT
+from constants import START_AT, END_AT, WS_NEW_HEADERS
 
 app = FastAPI()
 
@@ -46,6 +46,9 @@ async def run(people_file: UploadFile, card_file:UploadFile, channel_id:str=Form
     people_file_read = await people_file.read()
     wb_people = load_workbook(filename=BytesIO(people_file_read))
     nick_to_human, card_num_to_human = NameExcelToDict().run(wb_people=wb_people)
+    cell_list = list(set([human.cell_name for human in card_num_to_human.values()]))
+    # CELL 이름
+    WS_NEW_HEADERS = WS_NEW_HEADERS[:-1] + cell_list + WS_NEW_HEADERS[-1]
 
     card_file_read = await card_file.read()
     wb_card = load_workbook(filename=BytesIO(card_file_read))
