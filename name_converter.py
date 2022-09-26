@@ -18,7 +18,8 @@ class Human(BaseModel):
 
 
 class NameExcelToDict:
-    header_cols = {"nicknames": []}
+    header_cols = {}
+    nickname_cols = []
     HEADER_START_ROW = 2
 
     def __init__(self, wb_people: openpyxl.Workbook):
@@ -47,7 +48,7 @@ class NameExcelToDict:
 
     def _set_nickname_cols(self, cell, value):
         if "name" in value:
-            self.header_cols["nicknames"].append(cell.col_idx)
+            self.nickname_cols.append(cell.col_idx)
 
     def _get_id_num(self, row):
         return self.ws.cell(row, 1).value
@@ -57,10 +58,9 @@ class NameExcelToDict:
         while self._get_id_num(row) is not None:
             row_values = {}
             for header, col_nums in self.header_cols.items():
-                if header == "nicknames":
-                    continue
                 row_values[header] = self.ws.cell(row, col_nums).value
-            for nickname_cols in self.header_cols["nicknames"]:
+
+            for nickname_cols in self.nickname_cols:
                 nickname = self.ws.cell(row, nickname_cols).value
                 if not nickname:
                     continue
