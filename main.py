@@ -2,6 +2,7 @@ import traceback
 from datetime import datetime
 from asyncio import sleep
 from io import BytesIO
+import json
 
 from requests.exceptions import SSLError
 from openpyxl import load_workbook
@@ -35,7 +36,7 @@ async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = 
 
     people_file_read = await people_file.read()
     wb_people = load_workbook(filename=BytesIO(people_file_read))
-    nick_to_human, card_num_to_human = NameExcelToDict().run(wb_people=wb_people)
+    nick_to_human, card_num_to_human = NameExcelToDict(wb_people=wb_people).run()s
     # 셀 헤더에 CIC끼리 뭉치기
     cell_list = list(
         set([(human.cic_name, human.cell_name) for human in card_num_to_human.values()])
@@ -53,7 +54,7 @@ async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = 
     card_sheet = card_data_converter.get_new_sheet()
     card_dict = card_data_converter.get_card_data_dict()
     card_data_converter.add_card_owner_to_new_sheet(card_num_to_human)
-
+    """
     attempts = 0
     pay_messages = None
     attempts += 1
@@ -92,7 +93,7 @@ async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = 
         except BaseException as e:
             error_traceback = traceback.format_exc()
             slack.error_report(error_traceback)
-
+    """
     # 결과물 (OUTPUT)
     vb = save_virtual_workbook(wb_card)
     slack.send_file(file=vb, channel_id=channel_id)
