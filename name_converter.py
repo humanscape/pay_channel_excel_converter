@@ -1,4 +1,4 @@
-from typing import Tuple, Final, Dict, List
+from typing import Tuple
 import openpyxl
 from pydantic import BaseModel
 
@@ -8,9 +8,8 @@ from constants import PEOPLE_LIST_HEADERS
 class Human(BaseModel):
     cic_name: str
     cell_name: str
-    eng_name: str
+    eng_name: str | None
     kor_name: str
-    eng_name: str
     card_full_num: str | None
 
     def __repr__(self):
@@ -54,10 +53,10 @@ class NameExcelToDict:
     def _id_exist(self, row) -> bool:
         return self.ws.cell(row, 1).value is not None
 
-    def _init_dicts(self):
+    def _init_dicts(self) -> None:
         row = self.HEADER_START_ROW + 1
         while self._id_exist(row):
-            human = self._set_human(row)
+            human: Human = self._set_human(row)
             self._set_nick_to_human(row, human)
             self._set_card_num_to_human(human)
             row += 1
@@ -81,7 +80,6 @@ class NameExcelToDict:
             self.nick_to_human[nickname] = human
         return
 
-    def _set_card_num_to_human(self, human: Human):
+    def _set_card_num_to_human(self, human: Human) -> None:
         self.card_num_to_human[human.card_full_num] = human
-
         return
