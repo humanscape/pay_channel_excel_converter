@@ -2,18 +2,73 @@
 <head>
     <title> test 1 </title>
 </head>
+<body>
+<header>
+    <p style="padding:20px;"><img src="/static/human_logo.svg" /></p>
+</header>
+<div style="padding-left: 20px;">
     <form action= "/run/" method="post" enctype="multipart/form-data">
-        <label for="people_file"> 인명부 </label> <br>
-        <input type="file" name="people_file" accept=".xlsx"> 
-        <p> *주의! 2번row에 헤더 포함되어야 합니다. sheet 이름이 "Member List" 인지 확인해주세요.</p>
+        <label for="people_file"> <h3> 인명부 파일 </h3> </label>
+        <input type="file" id="people_file" name="people_file" accept=".xlsx">
+        <details>
+            <summary style="color:red;"> 주의사항 </summary>
+            <ul>
+                <li>
+                    sheet 이름이 "Member List" 인지 확인해주세요.
+                </li>
+                <li>
+                    헤더(이름, 성별, 입사일, ..)는 2번째 열에 포함해주세요.
+                </li>
+                <li>
+                    필수 헤더 : 이름, CIC(대소문자 구분X), CELL(대소문자 구분X), 카드번호, 영어이름
+                </li>
+                <li>
+                    영어이름의 한글발음을 추가하려면 : 헤더(2열)내용에 name(대소문자 구분X)이 포함된 상태로, 같은 행(col)에 추가
+                </li>
+            </ul>
+        </details>
+
         <br><br><br>
-        <label for="card_file"> 카드사 내역 </label> <br>
-        <input type="file" name="card_file" accept=".xlsx">
-        <p> *주의! sheet 이름이 "신용_국내" 인지 확인해주세요.</p>
+        <label for="card_file"> <h3> 결제내역 파일 </h3> </label>
+        <input type="file" id="card_file" name="card_file" accept=".xlsx">
+        <details>
+            <summary style="color:red;"> 주의사항! </summary>
+            <ul>
+                <li>
+                    sheet 이름이 "신용_국내" 인지 확인해주세요.
+                </li>
+                <li>
+                    sheet 내의 모든 수식(=B1+C1)을 값복사로 없애주세요.
+                </li>
+                <li>
+                    헤더(승인일, 카드번호, 승인금액 ..)는 1번째 열에 포함해주세요.
+                </li>
+                <li>
+                    필수 헤더 : 승인일, 승인시간, 카드번호, 이용자명, 가맹점명, 업종, 승인금액, 승인번호, 과세유형, 가맹점사업자번호
+                </li>
+            </ul>
+        </details>
+
         <br><br><br>
-        <label for="channel_id"> PAY_EXCEL_BOT의 채널 ID </label> <br>
-        <input type="text" name="channel_id" size="15">
-        <p> *주의! 사람마다 채널ID가 다릅니다. 꼭 직접 확인하세요. </p>
+        <label for="channel_id"> <h3> PAY_EXCEL_BOT의 채널 ID </h3> </label>
+        <input type="text" id="channel_id" name="channel_id" size="15">
+        <details>
+            <summary style="color:red;"> 주의사항 </summary>
+            <ul>
+                <li>
+                    <span style="color:red;"> 사람마다 채널 ID가 다르니 </span>, 직접 보고 입력해주세요.
+                </li>
+                <li>
+                    <details>
+                        <summary> 채널ID를 확인하는 방법 </summary>
+                        <p><img src="/static/channel_id_1.png" /></p>
+                        <p><img src="/static/channel_id_2.png" /></p>
+                    </details>
+                </li>
+            </ul>
+        </details>
         <input type="submit" value="시작">
     </form>
+</div>
+</body>
 </html>

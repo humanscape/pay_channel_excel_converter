@@ -9,6 +9,7 @@ from openpyxl.writer.excel import save_virtual_workbook
 from fastapi import FastAPI, UploadFile, Request, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 
 from name_converter import NameExcelToDict
 from card_data_conveter import CardDataConverter
@@ -17,8 +18,10 @@ from constants import START_AT, END_AT, WS_NEW_HEADERS
 
 app = FastAPI()
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.get("/", response_class=HTMLResponse)
+
+@app.get("/upload-form", response_class=HTMLResponse)
 async def upload_form(request: Request):
     templates = Jinja2Templates(directory="templates")
     return templates.TemplateResponse("upload_form.html", {"request": request})
