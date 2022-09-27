@@ -1,11 +1,35 @@
 <html>
 <head>
-    <title> test 1 </title>
+    <title> 결제채널 엑셀 변환기 </title>
+    <link rel="icon" href="https://humanscape.io/images/favicon.png" type="image/icon type">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 </head>
-<body>
+<body style="text-align: center;">
 <header>
-    <p style="padding:20px;"><img src="/static/human_logo.svg" /></p>
+    <p style="padding:20px;"><img style="width: min(80%, 400px);" src="/static/human_logo1.png" /></p>
 </header>
+<div class="input-form" style="display: flex; align-items: center; justify-content: center;"> 
+    <form action= "/run/" method="post" enctype="multipart/form-data" style="width: min(80%, 400px);">
+
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" name="channel_id" placeholder="D042H38JSP9" aria-label="Recipient's username" aria-describedby="basic-addon2">
+        <span class="input-group-text" id="basic-addon2"> 채널ID </span>
+      </div>
+  
+  <div class="input-group mb-3" >
+    <input type="file" class="form-control" id="inputGroupFile02" name="people_file" accept=".xlsx">
+    <label class="input-group-text" for="inputGroupFile02"> 인명부.xlsx </label>
+  </div>
+    
+  <div class="input-group" mb-3>
+    <input type="file" class="form-control" id="inputGroupFile04" name="card_file" accept=".xlsx">
+    <label class="input-group-text" for="inputGroupFile02"> 카드사 내역.xlsx </label>
+  </div>
+    <button type="submit" class="btn btn-primary btn-lg" style="margin-top: 30px;"> 변환시작 </button>
+  </form>
+</div>
+<!--
 <div style="padding-left: 20px;">
     <form action= "/run/" method="post" enctype="multipart/form-data">
         <label for="people_file"> <h3> 인명부 파일 </h3> </label>
@@ -70,5 +94,6 @@
         <input type="submit" value="시작">
     </form>
 </div>
+-->
 </body>
 </html>
