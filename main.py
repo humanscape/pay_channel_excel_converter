@@ -33,34 +33,50 @@ async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = 
     if not send_success:
         return "슬랙 메시지 전송에 실패했습니다. 채널ID를 확인해주세요."
 
-    people_file_read = await people_file.read()
-    wb_people = load_workbook(filename=BytesIO(people_file_read))
-    nick_to_human, card_num_to_human = NameExcelToDict(wb_people=wb_people).run()
-    # 셀 헤더에 CIC끼리 뭉치기
-    cell_list = list(
-        set([(human.cic_name, human.cell_name) for human in card_num_to_human.values()])
-    )
-    cell_list.sort()
-    cell_list = [x[1] for x in cell_list]
+    try:
+        people_file_read = await people_file.read()
+        wb_people = load_workbook(filename=BytesIO(people_file_read))
+        nick_to_human, card_num_to_human = NameExcelToDict(wb_people=wb_people).run()
+        # 셀 헤더에 CIC끼리 뭉치기
+        cell_list = list(
+            set(
+                [
+                    (human.cic_name, human.cell_name)
+                    for human in card_num_to_human.values()
+                ]
+            )
+        )
+        cell_list.sort()
+        cell_list = [x[1] for x in cell_list]
+        WS_NEW_HEADERS.extend(cell_list)
+        WS_NEW_HEADERS.append("댓글/파일")
+    # BaseException 대신 파싱하다가 날 수 있는 에러 목록 찾아서 추가 필요
+    except BaseException as e:
+        error_traceback = traceback.format_exc()
+        slack.error_report(error_traceback)
+        return {"message": "인명부 파일을 포맷을 확인해주세요."}
 
-    WS_NEW_HEADERS.extend(cell_list)
-    WS_NEW_HEADERS.append("댓글/파일")
+    try:
+        card_file_read = await card_file.read()
+        wb_card = load_workbook(filename=BytesIO(card_file_read))
+        card_data_converter = CardDataConverter(wb_card)
+        card_sheet = card_data_converter.get_new_sheet()
+        card_dict = card_data_converter.get_card_data_dict()
+        card_data_converter.add_card_owner_to_new_sheet(card_num_to_human)
+    # BaseException 대신 파싱하다가 날 수 있는 에러 목록 찾아서 추가 필요
+    except BaseException as e:
+        error_traceback = traceback.format_exc()
+        slack.error_report(error_traceback)
+        return {"message": "카드사 파일 포맷을 확인해주세요."}
 
-    card_file_read = await card_file.read()
-    wb_card = load_workbook(filename=BytesIO(card_file_read))
-    card_data_converter = CardDataConverter(wb_card)
-    card_sheet = card_data_converter.get_new_sheet()
-    card_dict = card_data_converter.get_card_data_dict()
-    card_data_converter.add_card_owner_to_new_sheet(card_num_to_human)
-
-    attempts = 0
-    attempts += 1
     pay_messages = slack.crawl_all_messages()
 
     if not pay_messages:
         slack.error_report(message="채널에서 메시지 수집에 실패했습니다.")
         return "채널에서 메시지 수집에 실패했습니다."
+
     attempts = 0
+    attempts += 1
     idx_passed = 0
 
     while attempts < 50:
