@@ -94,18 +94,13 @@ class Slack:
             header_option = {}
         if data_option is None:
             data_option = {}
-        try:
-            res = requests.post(
-                url=SLACK_URL + method,
-                headers={**self.headers, **header_option},
-                data={**self._data, **data_option},
-                verify=False,
-            ).json()
-            return res
-        except SSLError as ssl_error:
-            pass
-            # await sleep(30)
-            # self.error_report(ssl_error)
+        res = requests.post(
+            url=SLACK_URL + method,
+            headers={**self.headers, **header_option},
+            data={**self._data, **data_option},
+            verify=False,
+        ).json()
+        return res
 
     def crawl_all_messages(self) -> dict:
         while self.Q1:
