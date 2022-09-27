@@ -1,6 +1,6 @@
 import os
 import traceback
-from asyncio import sleep
+from time import sleep
 from collections import deque
 from datetime import datetime
 import urllib3
@@ -90,6 +90,10 @@ class Slack:
         header_option: dict | None = None,
         data_option: dict | None = None,
     ):
+        if header_option is None:
+            header_option = {}
+        if data_option is None:
+            data_option = {}
         try:
             res = requests.post(
                 url=SLACK_URL + method,
@@ -137,7 +141,7 @@ class Slack:
 
         if res.response_metadata:
             self.Q1.append(res.response_metadata.next_cursor)
-        await sleep(3)
+        sleep(3)
         return
 
     def get_a_reply_from_slack(self, ts, pay_channel_datas: dict):
