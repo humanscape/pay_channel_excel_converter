@@ -39,16 +39,8 @@ async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = 
     try:
         people_file_read = await people_file.read()
         wb_people = load_workbook(filename=BytesIO(people_file_read))
-        nick_to_human, card_num_to_human = NameExcelToDict(wb_people=wb_people).run()
-        # 셀 헤더에 CIC끼리 뭉치기
-        cell_list = list(
-            set(
-                [
-                    (human.cic_name, human.cell_name)
-                    for human in nick_to_human.values()
-                ]
-            )
-        )
+        nick_to_human, card_num_to_human, cell_list = NameExcelToDict(wb_people=wb_people).run()
+
         cell_list.sort()
         cell_list = [x[1] for x in cell_list]
         WS_NEW_HEADERS.extend(cell_list)
