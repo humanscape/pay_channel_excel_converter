@@ -45,7 +45,7 @@ async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = 
             set(
                 [
                     (human.cic_name, human.cell_name)
-                    for human in card_num_to_human.values()
+                    for human in nick_to_human.values()
                 ]
             )
         )
