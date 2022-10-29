@@ -109,7 +109,6 @@ class CardDataConverter:
         )
         usage = usage_and_kor_names_and_cells["usage"]
         kor_names = usage_and_kor_names_and_cells["kor_names"]
-        cell_counter = usage_and_kor_names_and_cells["cell_counter"]
 
         if usage is not None:
             ws.cell(row, self.USAGE_COL, usage)
@@ -117,8 +116,9 @@ class CardDataConverter:
         if kor_names:
             ws.cell(row, self.OWNER_COL, kor_names)
 
-        if cell_counter:
-            for cell, count in cell_counter.items():
-                ws.cell(row, WS_NEW_HEADERS.index(cell), int(count))
+        # cell_counter = usage_and_kor_names_and_cells["cell_counter"]
+        # if cell_counter:
+        #     for cell, count in cell_counter.items():
+        #         ws.cell(row, WS_NEW_HEADERS.index(cell), int(count))
 
         return

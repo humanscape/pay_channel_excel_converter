@@ -39,11 +39,11 @@ async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = 
     try:
         people_file_read = await people_file.read()
         wb_people = load_workbook(filename=BytesIO(people_file_read))
-        nick_to_human, card_num_to_human, cell_list = NameExcelToDict(wb_people=wb_people).run()
+        nick_to_human, card_num_to_human = NameExcelToDict(wb_people=wb_people).run()
 
-        cell_list.sort()
-        cell_list = [x[1] for x in cell_list]
-        WS_NEW_HEADERS.extend(cell_list)
+        # cell_list.sort()
+        # cell_list = [x[1] for x in cell_list]
+        # WS_NEW_HEADERS.extend(cell_list)
         WS_NEW_HEADERS.append("댓글/파일")
     # BaseException 대신 파싱하다가 날 수 있는 에러 목록 찾아서 추가 필요
     except BaseException as e:

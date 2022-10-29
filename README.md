@@ -20,3 +20,5 @@
 - 더 정밀하게 INPUT/OUTPUT 받아서 일을 더 줄여주기
 - 비동기/Thread 화하기 -> API로 도중호출/정지 기능 추가
 - SSLError 해결(*)
+- DEPRECATED : 셀 목록 안쓰기로 해서 삭제
+- TODO : 주차장 관련 댓글 저장 안되고 있음
