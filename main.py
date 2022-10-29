@@ -1,5 +1,6 @@
 import traceback
 from datetime import datetime
+from threading import Thread
 from asyncio import sleep
 from io import BytesIO
 
@@ -20,6 +21,7 @@ app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+thread = None
 
 @app.get("/upload-form", response_class=HTMLResponse)
 async def upload_form(request: Request):
