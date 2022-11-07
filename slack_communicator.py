@@ -39,10 +39,10 @@ class PayChannelData:
         # text = "국민(8886) / 사용 / 28,000원 / 08/02 20:27 / 이태리부대찌개"
         if any(exec in text for exec in PAY_CHANNEL_NOT_CRAWL_LIST):
             raise NotWantToSaveException(text[:40])
-        if "(결제봇 누락-수기 작성)" in text :
-            text = text.replace("(결제봇 누락-수기 작성)", "")
-        if "[결제봇 누락-수기 작성]" in text :
-            text = text.replace("[결제봇 누락-수기 작성]", "")
+        if "(결제봇 누락-수기 작성)\n" in text :
+            text = text.replace("(결제봇 누락-수기 작성)\n", "")
+        if "[결제봇 누락-수기 작성]\n" in text :
+            text = text.replace("[결제봇 누락-수기 작성]\n", "")
         texts = list(map(str.strip, text.split("/")))
         # texts = ["국민(8886)", "사용", "28,000원", "08", "02 20:27", "이태리부대찌개"]
 
