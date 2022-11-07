@@ -20,7 +20,7 @@ class CardDataConverter:
         return self.ws_new
 
     def get_card_data_dict(self):
-        return self._get_dict_time_card_amount_to_row()
+        return self._get_dict_time_card_to_row()
 
     def _set_additional_sheet(self) -> Workbook.worksheets:
         self.ws_new = self._init_new_sheet()

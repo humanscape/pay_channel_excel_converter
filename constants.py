@@ -4,8 +4,8 @@ _now = datetime.now() - timedelta(hours=9)
 _month_ago = _now - timedelta(days=30)
 
 SLACK_URL = "https://humanscape.slack.com/api/"
-START_AT = datetime(_month_ago.year, _month_ago.month, 1)
-END_AT = datetime(_now.year, _now.month, 1)
+START_AT = datetime(_month_ago.year, _month_ago.month-1, 1)
+END_AT = datetime(_now.year, _now.month-1, 1)
 
 YEAR = _month_ago.year
 PEOPLE_LIST_HEADERS = {

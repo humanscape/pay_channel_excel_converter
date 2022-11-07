@@ -39,7 +39,6 @@ class PayChannelData:
         # text = "국민(8886) / 사용 / 28,000원 / 08/02 20:27 / 이태리부대찌개"
         if any(exec in text for exec in PAY_CHANNEL_NOT_CRAWL_LIST):
             raise NotWantToSaveException(text[:40])
-
         texts = list(map(str.strip, text.split("/")))
         # texts = ["국민(8886)", "사용", "28,000원", "08", "02 20:27", "이태리부대찌개"]
 
@@ -126,7 +125,9 @@ class Slack:
                 continue
             except BaseException as e:
                 error_traceback = traceback.format_exc()
-                self.error_report(error_traceback)
+                self.error_report(ts=message.ts,
+                    message=f"수집에 실패한 텍스트: {message.text}",
+                    error_log=error_traceback)
                 continue
 
         if res.response_metadata:
@@ -161,12 +162,12 @@ class Slack:
 
         return
 
-    def error_report(self, message=traceback.format_exc()):
+    def error_report(self, ts:int, message, error_log=traceback.format_exc()):
         res = self._post_(
             "chat.postMessage",
             data_option={
                 "channel": SLACK_REPORT_CHANNEL_ID,
-                "text": message,
+                "text": f"""MESSAGE ::: {message} \r TS ::: {ts}, \r LOG ::: {error_log}""",
             })
 
     def send_message(self, message: str, channel_id: str):

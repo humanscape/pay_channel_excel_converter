@@ -25,14 +25,10 @@ thread = None
 
 @app.get("/upload-form", response_class=HTMLResponse)
 async def upload_form(request: Request):
-    templates = Jinja2Templates(directory="templates")
-    return templates.TemplateResponse("upload_form.html", {"request": request})
-
-@app.get("/run/")
-async def return_status(request:Request):
     global thread
     if thread is None or not thread.is_alive():
-        return "동작중 아님."
+        templates = Jinja2Templates(directory="templates")
+        return templates.TemplateResponse("upload_form.html", {"request": request})
     
     return "작업 중."
 
@@ -65,7 +61,7 @@ async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, channel
     # BaseException 대신 파싱하다가 날 수 있는 에러 목록 찾아서 추가 필요
     except BaseException as e:
         error_traceback = traceback.format_exc()
-        slack.error_report(error_traceback)
+        slack.error_report(message="인명부 파일을 포맷을 확인해주세요.")
         return {"message": "인명부 파일을 포맷을 확인해주세요."}
 
     try:
@@ -78,7 +74,7 @@ async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, channel
     # BaseException 대신 파싱하다가 날 수 있는 에러 목록 찾아서 추가 필요
     except BaseException as e:
         error_traceback = traceback.format_exc()
-        slack.error_report(error_traceback)
+        slack.error_report(message="카드사 파일 포맷을 확인해주세요.")
         return {"message": "카드사 파일 포맷을 확인해주세요."}
 
     pay_messages = slack.crawl_all_messages()
@@ -114,10 +110,10 @@ async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, channel
             break
         except SSLError as ssl_error:
             await sleep(30)
-            slack.error_report(ssl_error)
+            slack.error_report(message="SSL 에러", error_log=ssl_error)
         except BaseException as e:
             error_traceback = traceback.format_exc()
-            slack.error_report(error_traceback)
+            slack.error_report(error_log=error_traceback)
     # 결과물 (OUTPUT)
     vb = save_virtual_workbook(wb_card)
     slack.send_file(file=vb, channel_id=channel_id)
