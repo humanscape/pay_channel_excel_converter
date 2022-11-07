@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 _now = datetime.now() - timedelta(hours=9)
-_month_ago = _now - timedelta(days=30)
+_month_ago = _now - timedelta(days=28)
 
 SLACK_URL = "https://humanscape.slack.com/api/"
 START_AT = datetime(_month_ago.year, _month_ago.month, 1)
