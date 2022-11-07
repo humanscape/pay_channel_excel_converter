@@ -6,7 +6,7 @@ class SlackResponseMetaData(BaseModel):
 
 
 class SlackFile(BaseModel):
-    permalink: str
+    permalink: str | None
 
 
 class SlackMessage(BaseModel):

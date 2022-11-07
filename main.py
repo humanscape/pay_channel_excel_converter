@@ -1,6 +1,5 @@
 import traceback
 from datetime import datetime
-from threading import Thread
 from asyncio import sleep, create_task
 from io import BytesIO
 
@@ -61,7 +60,7 @@ async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, channel
     # BaseException 대신 파싱하다가 날 수 있는 에러 목록 찾아서 추가 필요
     except BaseException as e:
         error_traceback = traceback.format_exc()
-        slack.error_report(message="인명부 파일을 포맷을 확인해주세요.")
+        slack.send_message("인명부 파일을 포맷을 확인해주세요.")
         return {"message": "인명부 파일을 포맷을 확인해주세요."}
 
     try:
@@ -74,7 +73,7 @@ async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, channel
     # BaseException 대신 파싱하다가 날 수 있는 에러 목록 찾아서 추가 필요
     except BaseException as e:
         error_traceback = traceback.format_exc()
-        slack.error_report(message="카드사 파일 포맷을 확인해주세요.")
+        slack.send_message("카드사 파일 포맷을 확인해주세요.")
         return {"message": "카드사 파일 포맷을 확인해주세요."}
 
     pay_messages = slack.crawl_all_messages()
@@ -91,11 +90,13 @@ async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, channel
         attempts += 1
         try:
             for idx, (ts, pay_channel_data) in enumerate(pay_messages.items()):
+                if (idx < idx_passed) :
+                    continue
                 if idx % 100 == 0:
                     slack.send_message(
                         f"{len(pay_messages)}개의 글 중 {idx}번째 글의 댓글 수집중", channel_id
                     )
-                if (idx < idx_passed) or (pay_channel_data.dict_key not in card_dict) or ts is None:
+                if (pay_channel_data.dict_key not in card_dict) or ts is None:
                     continue
                 slack.get_a_reply_from_slack(ts, pay_messages)
                 row = card_dict[pay_channel_data.dict_key]
