@@ -1,7 +1,7 @@
 import traceback
 from datetime import datetime
 from threading import Thread
-from asyncio import sleep
+from asyncio import sleep, create_task
 from io import BytesIO
 
 from requests.exceptions import SSLError
@@ -28,9 +28,24 @@ async def upload_form(request: Request):
     templates = Jinja2Templates(directory="templates")
     return templates.TemplateResponse("upload_form.html", {"request": request})
 
+@app.get("/run/")
+async def return_status(request:Request):
+    global thread
+    if thread is None or not thread.is_alive():
+        return "동작중 아님."
+    
+    return "작업 중."
 
 @app.post("/run/")
 async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = Form()):
+    global thread
+    if thread is None or not thread.is_alive():
+        create_task(_run_in_thread(people_file, card_file, channel_id))
+        return "작업이 시작되었습니다."
+    else : 
+        return "작업 중. 슬랙 메시지를 확인하세요."
+
+async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, channel_id: str = Form()):
     slack = Slack()
     send_success = slack.send_message(
         f"요청을 받았습니다. 시작시간 :{datetime.now()} / 검색범위 : {START_AT} ~ {END_AT}", channel_id
@@ -106,4 +121,3 @@ async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = 
     # 결과물 (OUTPUT)
     vb = save_virtual_workbook(wb_card)
     slack.send_file(file=vb, channel_id=channel_id)
-    return "슬랙 메시지를 확인하세요."

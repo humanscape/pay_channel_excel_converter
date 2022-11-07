@@ -62,7 +62,7 @@ class CardDataConverter:
 
         return ws_new
 
-    def _get_dict_time_card_amount_to_row(self):
+    def _get_dict_time_card_to_row(self):
         ws_new = self.ws_new
         # 시간 + 카드번호 + 금액이 겹치는 경우는 없을 것이라고 가정
         # {"2022.07.01 10:12:00 1234 15000 " : "row_num" }
@@ -70,14 +70,14 @@ class CardDataConverter:
         date_col = WS_NEW_HEADERS.index("승인일")
         time_col = WS_NEW_HEADERS.index("승인시간")  # 초 00으로 변경
         card_num_col = WS_NEW_HEADERS.index("카드번호")  # 뒤 4자리만
-        amount_col = WS_NEW_HEADERS.index("승인금액")
+        # amount_col = WS_NEW_HEADERS.index("승인금액")
         for row in range(self.ROW_MIN, self.row_max):
             date = ws_new.cell(row, date_col).value
             time = ws_new.cell(row, time_col).value[:-2] + "00"
             card_num = ws_new.cell(row, card_num_col).value[-4:]
-            amount = ws_new.cell(row, amount_col).value
+            # amount = ws_new.cell(row, amount_col).value
 
-            card_data_row_to_pay_data[f"{date} {time} {card_num} {amount}"] = row
+            card_data_row_to_pay_data[f"{date} {time} {card_num}"] = row # f"{date} {time} {card_num} {amount}"
 
         return card_data_row_to_pay_data
 

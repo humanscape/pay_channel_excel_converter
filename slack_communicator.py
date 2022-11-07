@@ -4,7 +4,6 @@ from time import sleep
 from collections import deque
 from datetime import datetime
 import urllib3
-from requests.exceptions import SSLError
 
 import requests
 
@@ -62,7 +61,7 @@ class PayChannelData:
         self.amount = texts[2][:-1].replace(",", "")
 
         self.dict_key = (
-            f"{year}.{month}.{day} {hour}:{minute}:00 {self.card_num} {self.amount}"
+            f"{year}.{month}.{day} {hour}:{minute}:00 {self.card_num}" # f"{year}.{month}.{day} {hour}:{minute}:00 {self.card_num} {self.amount}"
         )
 
         def __repr__(self):
@@ -87,13 +86,9 @@ class Slack:
     def _post_(
         self,
         method: str,
-        header_option: dict | None = None,
-        data_option: dict | None = None,
+        header_option: dict = {},
+        data_option: dict = {},
     ):
-        if header_option is None:
-            header_option = {}
-        if data_option is None:
-            data_option = {}
         res = requests.post(
             url=SLACK_URL + method,
             headers={**self.headers, **header_option},
@@ -163,7 +158,6 @@ class Slack:
                 "filetype": "xlsx",
             },
         )
-        print(res.json())
 
         return
 
