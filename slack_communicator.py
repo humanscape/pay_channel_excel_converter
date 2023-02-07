@@ -8,7 +8,7 @@ import urllib3
 import requests
 
 from common import NotWantToSaveException
-from constants import START_AT, END_AT, SLACK_URL, PAY_CHANNEL_NOT_CRAWL_LIST
+from constants import SLACK_URL, PAY_CHANNEL_NOT_CRAWL_LIST
 from schemas import ConversationsHistory, ConversationsReplies, SlackMessage
 
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
@@ -33,7 +33,7 @@ class PayChannelData:
     replies = ""
     dict_key = ""
 
-    def __init__(self, message: SlackMessage):
+    def __init__(self, message: SlackMessage, start_at:datetime):
         """결제채널에 올라온 텍스트 데이터를 필요한 것들만 갖는 클래스로 변환"""
         text = message.text
         # text = "국민(8886) / 사용 / 28,000원 / 08/02 20:27 / 이태리부대찌개"
@@ -55,7 +55,7 @@ class PayChannelData:
         self.card_company, card_num = texts[0].split("(")
         self.card_num = card_num[:-1]
 
-        year = START_AT.year
+        year = start_at.year
         month = texts[3]
         day, time = texts[4].split(" ")
         hour, minute = time.split(":")
@@ -75,7 +75,9 @@ class PayChannelData:
 
 
 class Slack:
-    def __init__(self):
+    def __init__(self, start_at, end_at):
+        self.start_at = start_at
+        self.end_at = end_at
         self.Q1 = deque(["_"])
         self.pay_channel_datas = {}  # key:ts, value: PayChannelData
         self._data = {
@@ -116,15 +118,15 @@ class Slack:
                 "conversations.history",
                 data_option={
                     "cursor": cursor,
-                    "oldest": datetime_to_ts(START_AT),
-                    "latest": datetime_to_ts(END_AT),
+                    "oldest": datetime_to_ts(self.start_at),
+                    "latest": datetime_to_ts(self.end_at),
                     "limit": 300,
                 },
             )
         )
         for message in res.messages:
             try:
-                self.pay_channel_datas[message.ts] = PayChannelData(message)
+                self.pay_channel_datas[message.ts] = PayChannelData(message, self.start_at)
             except NotWantToSaveException as e:
                 continue
             except BaseException as e:

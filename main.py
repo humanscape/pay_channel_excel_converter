@@ -1,5 +1,5 @@
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 from asyncio import sleep, create_task
 from io import BytesIO
 
@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from name_converter import NameExcelToDict
 from card_data_conveter import CardDataConverter
 from slack_communicator import Slack
-from constants import START_AT, END_AT, WS_NEW_HEADERS
+from constants import WS_NEW_HEADERS
 
 app = FastAPI()
 
@@ -32,19 +32,19 @@ async def upload_form(request: Request):
     return "작업 중."
 
 @app.post("/run/")
-async def run(people_file: UploadFile, card_file: UploadFile, channel_id: str = Form()):
+async def run(people_file: UploadFile, card_file: UploadFile, start_at:str, end_at:str, channel_id: str = Form() ):
     global thread
+    start_at = datetime.strptime(start_at, "%Y%m%d") - timedelta(hours=9)
+    end_at = datetime.strptime(end_at, "%Y%m%d") - timedelta(hours=9)
     if thread is None or not thread.is_alive():
-        create_task(_run_in_thread(people_file, card_file, channel_id))
+        create_task(_run_in_thread(people_file, card_file, start_at, end_at, channel_id))
         return "작업이 시작되었습니다."
     else : 
         return "작업 중. 슬랙 메시지를 확인하세요."
 
-async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, channel_id: str = Form()):
-    slack = Slack()
-    send_success = slack.send_message(
-        f"요청을 받았습니다. 시작시간 :{datetime.now()} / 검색범위 : {START_AT} ~ {END_AT}", channel_id
-    )
+async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, start_at:datetime, end_at:datetime, channel_id: str = Form()):
+    slack = Slack(start_at, end_at)
+    send_success = slack.send_message(f"요청을 받았습니다. 시작시간 :{datetime.now()} / 검색범위 : {start_at.strftime('%Y%m%d')} ~ {end_at.strftime('%Y%m%d')}", channel_id)
     if not send_success:
         return "슬랙 메시지 전송에 실패했습니다. 채널ID를 확인해주세요."
 
@@ -90,13 +90,11 @@ async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, channel
         attempts += 1
         try:
             for idx, (ts, pay_channel_data) in enumerate(pay_messages.items()):
-                if (idx < idx_passed) :
-                    continue
                 if idx % 100 == 0:
                     slack.send_message(
                         f"{len(pay_messages)}개의 글 중 {idx}번째 글의 댓글 수집중", channel_id
                     )
-                if (pay_channel_data.dict_key not in card_dict) or ts is None:
+                if (idx < idx_passed) or (pay_channel_data.dict_key not in card_dict):
                     continue
                 slack.get_a_reply_from_slack(ts, pay_messages)
                 row = card_dict[pay_channel_data.dict_key]
