@@ -44,9 +44,7 @@ async def run(people_file: UploadFile, card_file: UploadFile, start_at:str, end_
 
 async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, start_at:datetime, end_at:datetime, channel_id: str = Form()):
     slack = Slack(start_at, end_at)
-    send_success = slack.send_message(
-        f"요청을 받았습니다. 시작시간 :{datetime.now()} / 검색범위 : {start_at.strftime('%Y%m%d')} ~ {end_at.strftime('%Y%m%d')}", channel_id
-    )
+    send_success = slack.send_message(f"요청을 받았습니다. 시작시간 :{datetime.now()} / 검색범위 : {start_at.strftime('%Y%m%d')} ~ {end_at.strftime('%Y%m%d')}", channel_id)
     if not send_success:
         return "슬랙 메시지 전송에 실패했습니다. 채널ID를 확인해주세요."
 
