@@ -1,13 +1,5 @@
-from datetime import datetime, timedelta
-
-_now = datetime.now() - timedelta(hours=9)
-_month_ago = _now - timedelta(days=28)
-
 SLACK_URL = "https://humanscape.slack.com/api/"
-START_AT = datetime(_month_ago.year, _month_ago.month, 1)
-END_AT = datetime(_now.year, _now.month, 1)
 
-YEAR = _month_ago.year
 PEOPLE_LIST_HEADERS = {
     "이름": "kor_name",
     "cic": "cic_name",

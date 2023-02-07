@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from name_converter import NameExcelToDict
 from card_data_conveter import CardDataConverter
 from slack_communicator import Slack
-from constants import START_AT, END_AT, WS_NEW_HEADERS
+from constants import WS_NEW_HEADERS
 
 app = FastAPI()
 
@@ -43,9 +43,9 @@ async def run(people_file: UploadFile, card_file: UploadFile, start_at:str, end_
         return "작업 중. 슬랙 메시지를 확인하세요."
 
 async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, start_at:datetime, end_at:datetime, channel_id: str = Form()):
-    slack = Slack()
+    slack = Slack(start_at, end_at)
     send_success = slack.send_message(
-        f"요청을 받았습니다. 시작시간 :{datetime.now()} / 검색범위 : {START_AT} ~ {END_AT}", channel_id
+        f"요청을 받았습니다. 시작시간 :{datetime.now()} / 검색범위 : {start_at.strftime('%Y%m%d')} ~ {end_at.strftime('%Y%m%d')}", channel_id
     )
     if not send_success:
         return "슬랙 메시지 전송에 실패했습니다. 채널ID를 확인해주세요."
