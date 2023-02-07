@@ -90,13 +90,11 @@ async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, start_a
         attempts += 1
         try:
             for idx, (ts, pay_channel_data) in enumerate(pay_messages.items()):
-                if (idx < idx_passed) :
-                    continue
                 if idx % 100 == 0:
                     slack.send_message(
                         f"{len(pay_messages)}개의 글 중 {idx}번째 글의 댓글 수집중", channel_id
                     )
-                if (pay_channel_data.dict_key not in card_dict) or ts is None:
+                if (idx < idx_passed) or (pay_channel_data.dict_key not in card_dict):
                     continue
                 slack.get_a_reply_from_slack(ts, pay_messages)
                 row = card_dict[pay_channel_data.dict_key]
