@@ -11,6 +11,15 @@
 </header>
 <div class="input-form" style="display: flex; align-items: center; justify-content: center;"> 
     <form action= "/run/" method="post" enctype="multipart/form-data" style="width: min(80%, 400px);">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" name="start_at" placeholder="20220101" aria-label="Recipient's username" aria-describedby="basic-addon2">
+        <span class="input-group-text" id="start_at"> 수집 시작일(해당일 00:00:00 부터) </span>
+    </div>
+
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" name="end_at" placeholder="20220131" aria-label="Recipient's username" aria-describedby="basic-addon2">
+        <span class="input-group-text" id="end_at"> 수집 종료일(해당일 23:59:59 까지) </span>
+    </div>
 
     <div class="input-group mb-3">
         <input type="text" class="form-control" name="channel_id" placeholder="D042H38JSP9" aria-label="Recipient's username" aria-describedby="basic-addon2">
