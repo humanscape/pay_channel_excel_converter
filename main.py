@@ -32,7 +32,7 @@ async def upload_form(request: Request):
     return "작업 중."
 
 @app.post("/run/")
-async def run(people_file: UploadFile, card_file: UploadFile, start_at:str, end_at:str, channel_id: str = Form() ):
+async def run(people_file: UploadFile, card_file: UploadFile, start_at:str = Form(), end_at:str = Form(), channel_id: str = Form() ):
     global thread
     start_at = datetime.strptime(start_at, "%Y%m%d") - timedelta(hours=9)
     end_at = datetime.strptime(end_at, "%Y%m%d") - timedelta(hours=9)
@@ -60,7 +60,7 @@ async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, start_a
     # BaseException 대신 파싱하다가 날 수 있는 에러 목록 찾아서 추가 필요
     except BaseException as e:
         error_traceback = traceback.format_exc()
-        slack.send_message("인명부 파일을 포맷을 확인해주세요.")
+        slack.send_message("인명부 파일을 포맷을 확인해주세요.", channel_id)
         return {"message": "인명부 파일을 포맷을 확인해주세요."}
 
     try:
@@ -73,7 +73,7 @@ async def _run_in_thread(people_file: UploadFile, card_file: UploadFile, start_a
     # BaseException 대신 파싱하다가 날 수 있는 에러 목록 찾아서 추가 필요
     except BaseException as e:
         error_traceback = traceback.format_exc()
-        slack.send_message("카드사 파일 포맷을 확인해주세요.")
+        slack.send_message("카드사 파일 포맷을 확인해주세요.", channel_id)
         return {"message": "카드사 파일 포맷을 확인해주세요."}
 
     pay_messages = slack.crawl_all_messages()
