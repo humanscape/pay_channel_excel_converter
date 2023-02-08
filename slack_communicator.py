@@ -56,6 +56,8 @@ class PayChannelData:
         self.card_num = card_num[:-1]
 
         year = start_at.year
+        if (start_at.month, start_at.day) == (12, 31):
+            year += 1
         month = texts[3]
         day, time = texts[4].split(" ")
         hour, minute = time.split(":")
