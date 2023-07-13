@@ -5,3 +5,5 @@ __pycache__/
 upload_test/
 .DS_Store
 *.pdf
+env/
+venv/
