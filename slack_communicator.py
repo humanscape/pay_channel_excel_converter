@@ -1,14 +1,14 @@
 import os
 import traceback
-from time import sleep
 from collections import deque
 from datetime import datetime
-import urllib3
+from time import sleep
 
 import requests
+import urllib3
 
 from common import NotWantToSaveException
-from constants import SLACK_URL, PAY_CHANNEL_NOT_CRAWL_LIST
+from constants import PAY_CHANNEL_NOT_CRAWL_LIST, SLACK_URL
 from schemas import ConversationsHistory, ConversationsReplies, SlackMessage
 
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")

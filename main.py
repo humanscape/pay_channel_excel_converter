@@ -1,26 +1,31 @@
 import traceback
+from asyncio import create_task, sleep
 from datetime import datetime, timedelta
-from asyncio import sleep, create_task
 from io import BytesIO
 
-from requests.exceptions import SSLError
-from openpyxl import load_workbook
-from openpyxl.writer.excel import save_virtual_workbook
-from fastapi import FastAPI, UploadFile, Request, Form
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from openpyxl import load_workbook
+from openpyxl.writer.excel import save_virtual_workbook
+from requests.exceptions import SSLError
 
-from name_converter import NameExcelToDict
 from card_data_conveter import CardDataConverter
-from slack_communicator import Slack
 from constants import WS_NEW_HEADERS
+from name_converter import NameExcelToDict
+from slack_communicator import Slack
 
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 thread = None
+
+@app.get("/", response_class=HTMLResponse)
+async def status_checker(request: Request):
+    return HTMLResponse("")
+
 
 @app.get("/upload-form", response_class=HTMLResponse)
 async def upload_form(request: Request):
