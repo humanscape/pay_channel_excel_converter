@@ -1,0 +1,64 @@
+name: AWS dev server deploy
+env:
+  PROJECT_NAME: pay_channel_excel_converter
+  AWS_REGION: ap-northeast-2
+
+on:
+  push:
+    branches:
+      - feature/000_github_action_deploy
+
+jobs:
+  build:
+    name: Upload S3 And Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: make env folder
+        run: mkdir -p env
+
+      - name: Set envs
+        run: >
+          jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' <<<
+          $SECRETS_CONTEXT >> env/.env
+        env:
+          SECRETS_CONTEXT: '${{ toJson(secrets) }}'
+
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
+  
+      - name: Get current time
+        uses: josStorer/get-current-time@v2
+        id: current-time
+        with:
+          format: YYYYMMDD-HHmmss
+          utcOffset: "+09:00"
+
+      - name: Make tar file
+        run: tar -cpvzf ./$GITHUB_SHA.tgz *
+        shell: bash
+
+      - name: Upload to S3
+        run: |
+          aws s3 cp \
+            --region ap-northeast-2 \
+            ./$GITHUB_SHA.tgz s3://pay-channel-excel-converter-deploy/$GITHUB_SHA.tgz
+
+      - name: Deploy to EC2
+        run: |
+          aws deploy create-deployment \
+            --application-name $PROJECT_NAME \
+            --file-exists-behavior OVERWRITE \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --deployment-group-name prod \
+            --s3-location bucket=pay-channel-excel-converter-deploy,bundleType=tgz,key=$GITHUB_SHA.tgz
+
