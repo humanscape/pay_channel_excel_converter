@@ -6,11 +6,13 @@ from time import sleep
 
 import requests
 import urllib3
+from dotenv import load_dotenv
 
 from common import NotWantToSaveException
 from constants import PAY_CHANNEL_NOT_CRAWL_LIST, SLACK_URL
 from schemas import ConversationsHistory, ConversationsReplies, SlackMessage
 
+load_dotenv()
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 PAY_CHANNEL_ID = os.environ.get("PAY_CHANNEL_ID")
 SLACK_REPORT_CHANNEL_ID = os.environ.get("SLACK_REPORT_CHANNEL_ID")

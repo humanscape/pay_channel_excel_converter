@@ -7,3 +7,4 @@ upload_test/
 *.pdf
 env/
 venv/
+.env
