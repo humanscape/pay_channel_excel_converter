@@ -9,6 +9,10 @@ permissions:
     owner: ec2-user
     group: ec2-user
 hooks:
+  ApplicationStop:
+    - location: infra/stop_server.sh
+      timeout: 300
+      runas: ec2-user
   AfterInstall:
     - location: infra/install_dependencies.sh
       timeout: 300

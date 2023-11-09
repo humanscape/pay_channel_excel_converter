@@ -1,0 +1,1 @@
+sudo kill -9 $(ps -ef | grep uvicorn  | awk '{print $2}')
